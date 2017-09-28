@@ -1,0 +1,26 @@
+{
+  "name": "grpc-ts-test",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Test project for the gRPC typescript definitions",
+  "main": "index.ts",
+  "scripts": {
+    "test": "tsc --strict --noEmit index.ts",
+    "lint": "tslint index.ts node_modules/grpc/src/node/index.d.ts"
+  },
+  "keywords": [
+    "typescript",
+    "grpc"
+  ],
+  "author": "Crevil <bjoern.soerensen@gmail.com> (https://github.com/Crevil)",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "8.0.31",
+    "tslint": "5.7.0",
+    "typescript": "2.5.3"
+  },
+  "dependencies": {
+    "grpc": "1.6.0",
+    "protobufjs": "6.8.0"
+  }
+}
