@@ -6,7 +6,7 @@
   "main": "index.ts",
   "scripts": {
     "test": "tsc --strict --noEmit index.ts",
-    "lint": "tslint index.ts node_modules/grpc/src/node/index.d.ts"
+    "lint": "tslint index.ts node_modules/grpc/index.d.ts"
   },
   "keywords": [
     "typescript",
