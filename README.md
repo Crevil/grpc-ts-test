@@ -26,3 +26,11 @@ npm link ../grpc-node/packages/grpc-native-core/
 ```
 
 When making changes to the `index.d.ts` file in grpc-node the commands from the usage section will hit the editied files.
+
+You might have to clone the git sub-modules from `grpc-node` as well.
+
+```
+cd grpc-node
+git submodule update --init
+git submodule foreach --recursive git submodule update --init
+```
