@@ -15,3 +15,14 @@ Install deps with `npm install`.
 Run the test compilation with `npm test`.
 
 To lint the test file and the definitions in the gRPC lib, run `npm run lint`.
+
+## Development
+When editing the types it's easies to clone the [grpc-node](http://github.com/grpc/grpc-node) repository and link to the package.
+
+```
+git clone https://github.com/lunarway/grpc-node.git
+cd grpc-ts-test
+npm link ../grpc-node/packages/grpc-native-core/
+```
+
+When making changes to the `index.d.ts` file in grpc-node the commands from the usage section will hit the editied files.
