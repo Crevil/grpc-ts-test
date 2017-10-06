@@ -26,10 +26,10 @@ const deserialize: grpc.deserialize = (data) => {};
 client.makeBidiStreamRequest("method", serialize, deserialize);
 client.makeBidiStreamRequest("method", serialize, deserialize, metadata);
 const callOptions: grpc.CallOptions = {
-  credentials: grpc.credentials.createInsecure(),
+  credentials: {} as grpc.CallCredentials,
   deadline: new Date(),
   host: "host",
-  parent: new grpc.ClientDuplexStream({}),
+  parent: {} as grpc.Call,
   propagate_flags: grpc.propagate.DEFAULTS,
 };
 const duplexStream: grpc.ClientDuplexStream = client.makeBidiStreamRequest("method", serialize, deserialize, metadata, callOptions);
@@ -37,10 +37,12 @@ const duplexStream: grpc.ClientDuplexStream = client.makeBidiStreamRequest("meth
 const writeableStream: grpc.ClientWritableStream = client.makeClientStreamRequest("method", serialize, deserialize, null, callOptions, (error: Error, value: any) => {});
 client.makeClientStreamRequest("method", serialize, deserialize, null, null, (error: Error, value: any) => {});
 client.makeClientStreamRequest("method", serialize, deserialize, metadata, callOptions, (error: Error, value: any) => {});
+const write = writeableStream.write("message", grpc.writeFlags.BUFFER_HINT, () => {});
 
 const readableStream: grpc.ClientReadableStream = client.makeServerStreamRequest("method", serialize, deserialize, {});
 client.makeServerStreamRequest("method", serialize, deserialize, {}, metadata);
 client.makeServerStreamRequest("method", serialize, deserialize, {}, metadata, callOptions);
+const read: any = readableStream.read(2);
 
 const unaryCall: grpc.ClientUnaryCall = client.makeUnaryRequest("method", serialize, deserialize, {}, null, null, (error: Error, value: any) => {});
 client.makeUnaryRequest("method", serialize, deserialize, {}, metadata, null, (error: Error, value: any) => {});
@@ -56,11 +58,20 @@ const server: grpc.Server = new grpc.Server();
 new grpc.Server({});
 server.addService(new Service("name"), {
   unary: (call: grpc.ServerUnaryCall, callback: grpc.sendUnaryData) => {},
-  clientStream: (call: grpc.ServerReadableStream, callback: grpc.sendUnaryData) => {},
-  serverStream: (call: grpc.ServerWriteableStream) => {},
-  duplexStream: (call: grpc.ServerDuplexStream) => {},
+  clientStream: (call: grpc.ServerReadableStream, callback: grpc.sendUnaryData) => {
+    const read: any = call.read(1);
+  },
+  serverStream: (call: grpc.ServerWriteableStream) => {
+    const wrote: boolean = call.write("chunk", () => {});
+    const wroteWithEncoding: boolean = call.write("chunk", "UTF", () => {});
+  },
+  duplexStream: (call: grpc.ServerDuplexStream) => {
+    const read: any = call.read(1);
+    const wrote: boolean = call.write("chunk", () => {});
+    const wroteWithEncoding: boolean = call.write("chunk", "UTF", () => {});
+  },
 });
-server.bind("host:port", grpc.credentials.createInsecure());
+const port: number = server.bind("host:port", grpc.credentials.createInsecure());
 server.forceShutdown();
 const handlerSet: boolean = server.register("method", (call: grpc.ServerUnaryCall) => {}, serialize, deserialize, "type");
 server.start();
@@ -137,7 +148,7 @@ const deadlineDate: grpc.Deadline = new Date();
 const deserializeFunc: grpc.deserialize = (data: Buffer) => {};
 const serializeFunc: grpc.serialize = (value: any) => (new Buffer(""));
 
-const error: grpc.ServiceError = new grpc.ServiceError();
+const error: grpc.ServiceError = new Error();
 error.code = grpc.status.OK;
 error.metadata = metadata;
 
@@ -153,13 +164,9 @@ const statusObject: grpc.StatusObject = {
 const credentials = grpc.credentials;
 
 let c: grpc.CallCredentials;
-c = credentials.combineCallCredentials(credentials.createInsecure(), credentials.createInsecure());
-c = credentials.combineChannelCredentials(new grpc.ChannelCredentials(), credentials.createInsecure(), credentials.createInsecure());
-const googleCredential: grpc.GoogleCredential = {
-  access_token: "accessToken",
-  expiry_date: 1,
-  refresh_token: "refreshToken",
-  token_type: "tokenType",
+const callCredentials: grpc.CallCredentials = credentials.combineCallCredentials(credentials.createInsecure().getCallCredentials(), credentials.createInsecure().getCallCredentials());
+const googleCredential: grpc.GoogleOAuth2Client = {
+  getRequestMetadata(optUri: string, cb: (err: Error, headers: any) => void) {},
 };
 c = credentials.createFromGoogleCredential(googleCredential);
 c = credentials.createFromMetadataGenerator((params, callback) => {
@@ -167,6 +174,7 @@ c = credentials.createFromMetadataGenerator((params, callback) => {
   callback(new Error(), metadata);
   callback(null, metadata);
 });
+const channelCredentials: grpc.ChannelCredentials = credentials.combineChannelCredentials(credentials.createInsecure(), credentials.createInsecure().getCallCredentials());
 
 let chC: grpc.ChannelCredentials;
 chC = credentials.createInsecure();
