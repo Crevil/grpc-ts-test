@@ -33,11 +33,13 @@ const callOptions: grpc.CallOptions = {
   propagate_flags: grpc.propagate.DEFAULTS,
 };
 const duplexStream: grpc.ClientDuplexStream = client.makeBidiStreamRequest("method", serialize, deserialize, metadata, callOptions);
+const wrote = duplexStream.write({}, grpc.writeFlags.BUFFER_HINT, () => {});
+const duplexRead: any = duplexStream.read(1);
 
 const writeableStream: grpc.ClientWritableStream = client.makeClientStreamRequest("method", serialize, deserialize, null, callOptions, (error: Error, value: any) => {});
 client.makeClientStreamRequest("method", serialize, deserialize, null, null, (error: Error, value: any) => {});
 client.makeClientStreamRequest("method", serialize, deserialize, metadata, callOptions, (error: Error, value: any) => {});
-const write = writeableStream.write("message", grpc.writeFlags.BUFFER_HINT, () => {});
+const write = writeableStream.write({}, grpc.writeFlags.BUFFER_HINT, () => {});
 
 const readableStream: grpc.ClientReadableStream = client.makeServerStreamRequest("method", serialize, deserialize, {});
 client.makeServerStreamRequest("method", serialize, deserialize, {}, metadata);
@@ -62,13 +64,13 @@ server.addService(new Service("name"), {
     const read: any = call.read(1);
   },
   serverStream: (call: grpc.ServerWriteableStream) => {
-    const wrote: boolean = call.write("chunk", () => {});
-    const wroteWithEncoding: boolean = call.write("chunk", "UTF", () => {});
+    const wrote: boolean = call.write({}, () => {});
+    const wroteWithEncoding: boolean = call.write({}, "UTF", () => {});
   },
   duplexStream: (call: grpc.ServerDuplexStream) => {
     const read: any = call.read(1);
-    const wrote: boolean = call.write("chunk", () => {});
-    const wroteWithEncoding: boolean = call.write("chunk", "UTF", () => {});
+    const wrote: boolean = call.write({}, () => {});
+    const wroteWithEncoding: boolean = call.write({}, "UTF", () => {});
   },
 });
 const port: number = server.bind("host:port", grpc.credentials.createInsecure());
