@@ -35,6 +35,7 @@ const callOptions: grpc.CallOptions = {
 const duplexStream: grpc.ClientDuplexStream = client.makeBidiStreamRequest("method", serialize, deserialize, metadata, callOptions);
 const wrote = duplexStream.write({}, grpc.writeFlags.BUFFER_HINT, () => {});
 const duplexRead: any = duplexStream.read(1);
+duplexRead.on("data", (chunk: object) => {});
 
 const writeableStream: grpc.ClientWritableStream = client.makeClientStreamRequest("method", serialize, deserialize, null, callOptions, (error: Error, value: any) => {});
 client.makeClientStreamRequest("method", serialize, deserialize, null, null, (error: Error, value: any) => {});
@@ -45,6 +46,7 @@ const readableStream: grpc.ClientReadableStream = client.makeServerStreamRequest
 client.makeServerStreamRequest("method", serialize, deserialize, {}, metadata);
 client.makeServerStreamRequest("method", serialize, deserialize, {}, metadata, callOptions);
 const read: any = readableStream.read(2);
+readableStream.on("data", (chunk: object) => {});
 
 const unaryCall: grpc.ClientUnaryCall = client.makeUnaryRequest("method", serialize, deserialize, {}, null, null, (error: Error, value: any) => {});
 client.makeUnaryRequest("method", serialize, deserialize, {}, metadata, null, (error: Error, value: any) => {});
@@ -62,6 +64,7 @@ server.addService(new Service("name"), {
   unary: (call: grpc.ServerUnaryCall, callback: grpc.sendUnaryData) => {},
   clientStream: (call: grpc.ServerReadableStream, callback: grpc.sendUnaryData) => {
     const read: any = call.read(1);
+    call.on("data", (chunk: object) => {});
   },
   serverStream: (call: grpc.ServerWriteableStream) => {
     const wrote: boolean = call.write({}, () => {});
@@ -71,6 +74,7 @@ server.addService(new Service("name"), {
     const read: any = call.read(1);
     const wrote: boolean = call.write({}, () => {});
     const wroteWithEncoding: boolean = call.write({}, "UTF", () => {});
+    call.on("data", (chunk: object) => {});
   },
 });
 const port: number = server.bind("host:port", grpc.credentials.createInsecure());
